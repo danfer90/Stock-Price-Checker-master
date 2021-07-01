@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Nasdaq Stock Price Checker</title>
+    <meta name="description">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/public/style.css">
+  </head>
+  <body>
+    <header>
+      <h1 class="heading">Nasdaq Stock Price Checker</h1>
+    </header>
+    <div id="formSection">
+      <h3>Get single price and total likes</h3>
+      <form id="singleForm" class="forms">
+        <input type="text" name="stock" placeholder="goog" required>
+        <input type="checkbox" name="like" value="true"> Like?<br>
+        <button type="submit">Get Price!</button>
+      </form>
+      <br>
+      <h3>Compare and get relative likes</h3>
+      <form id="doubleForm" class="forms">
+        <input type="text" name="stock" placeholder="goog" required>
+        <input type="text" name="stock" placeholder="msft" required>
+        <input type="checkbox" name="like" value="true"> Like both?<br>
+        <button type="submit">Get Price!</button>
+      </form>
+      <br>
+      <div id="result">
+        <h3>JSON Result</h3>
+        <code id="jsonResult">fhfgh</code>
+      </div>
+    </div>
+    <hr>
+
+    <div id="userstories">
+      <h3 class="heading">User Stories</h3>
+      <ol>
+        <li>Get stock prices with <b>GET</b> <code>/api/stock-prices</code> and a Nasdaq <i>stock</i> ticker, and receive back an object <i>stockData</i>.</li>
+        <li><i>stockData</i> contains the <i>stock</i>(string, the ticker), <i>price</i>(decimal in string format), and <i>likes</i>(int).</li>
+        <li>My like can be added to the stock(s), by passing along field <i>like</i> as <b>true</b>(boolean). Only 1 like per IP is accepted.</li>
+        <li>If 2 stocks are passed along, the return object is an array with both stock's info, but instead of <i>likes</i>, it displays <i>rel_likes</i>(the difference between the likes on both) for both the stocks.</li>
+      </ol>
+      <br>
+      <h3 class="heading">Example usage:</h3>
+      <code>/api/stock-prices?stock=goog</code><br>
+      <code>/api/stock-prices?stock=goog&amp;like=true</code><br>
+      <code>/api/stock-prices?stock=goog&amp;stock=msft</code><br>
+      <code>/api/stock-prices?stock=goog&amp;stock=msft&amp;like=true</code>
+      <br><br>
+      <h3 class="heading">Example return:</h3>
+      <code>{"stockData":{"stock":"GOOG","price":"786.90","likes":1}}</code><br>
+      <code>{"stockData":[{"stock":"MSFT","price":"62.30","rel_likes":-1},{"stock":"GOOG","price":"786.90","rel_likes":1}]}</code>
+    </div>
+    <hr>
+    
+    <!-- Your web-app is https, so your scripts need to be too -->
+    <script src="https://code.jquery.com/jquery-2.2.1.min.js"
+            integrity="sha256-gvQgAFzTH6trSrAWoH1iPo9Xc96QxSZ3feW6kem+O00="
+            crossorigin="anonymous"></script>
+    <script>
+      $(function() {
+        $('#singleForm').submit(function(e) {
+          e.preventDefault();
+          $.ajax({
+            url: '/api/stock-prices',
+            type: 'get',
+            data: $('#singleForm').serialize()
+          })
+            .done (function(data) {
+              $('#singleForm')[0].reset();
+              $("#result").show();
+              $('#jsonResult').text(JSON.stringify(data));
+            })
+            .fail (function(xhr) { 
+              $('#singleForm')[0].reset();
+              $("#result").show();
+              $('#jsonResult').text(xhr.responseJSON.error);
+            });
+        });
+        
+        $('#doubleForm').submit(function(e) {
+          e.preventDefault();
+          $.ajax({
+            url: '/api/stock-prices',
+            type: 'get',
+            data: $('#doubleForm').serialize()
+          })
+            .done (function(data) {
+              $('#doubleForm')[0].reset();
+              $("#result").show();
+              $('#jsonResult').text(JSON.stringify(data));
+            })
+          .fail (function(xhr) { 
+              $('#doubleForm')[0].reset();
+              $("#result").show();
+              $('#jsonResult').text(xhr.responseJSON.error);
+          });
+        });
+      });
+   </script>
+  </body>
+</html>
